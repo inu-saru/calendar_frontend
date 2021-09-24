@@ -19,6 +19,7 @@
         >
           <div
             class="calendar-daily"
+            :class="{outside: currentMonth !== day.month}"
             v-for="(day, index) in week"
             :key="index"
           >
@@ -46,13 +47,16 @@ export default {
       const weekNumber = Math.ceil(endDate.diff(startDate, "days") / 7);
 
       let calendars = [];
+      let calendarDate = this.getStartDate();
+
       for (let week = 0; week < weekNumber; week++) {
         let weekRow = [];
         for (let day = 0;  day < 7; day++) {
           weekRow.push({
-            date: startDate.get("date"),
+            date: calendarDate.get("date"),
+            month: calendarDate.format("YYYY-MM"),
           });
-          startDate.add(1, "days");
+          calendarDate.add(1, "days");
         }
         calendars.push(weekRow);
       }
@@ -134,5 +138,8 @@ export default {
   border-right:1px solid #E0E0E0;
   margin-right:-1px;
   text-align:center;
+}
+.outside{
+  background-color: #f7f7f7;
 }
 </style>
