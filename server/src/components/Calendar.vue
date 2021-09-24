@@ -1,12 +1,17 @@
 <template>
   <div>
     <div class="content">
-      <h2>カレンダー{{ currentDate }}</h2>
+      <h2>カレンダー {{ displayMonth }}</h2>
       <div class="button-area">
         <button @click="prevMonth" class="button">前の月</button>
         <button @click="nextMonth" class="button">次の月</button>
       </div>
       <div class="calendar">
+        <div class="calendar-weekly">
+          <div class="calendar-youbi" v-for="n in 7" :key="n">
+            {{ youbi(n-1) }}
+          </div>
+        </div>
         <div
           class="calendar-weekly"
           v-for="(week, index) in calendars"
@@ -71,12 +76,22 @@ export default {
     prevMonth() {
       this.currentDate = moment(this.currentDate).subtract(1, "month");
     },
+    youbi(dayIndex) {
+      const week = ["日", "月", "火", "水", "木", "金", "土"];
+      return week[dayIndex];
+    },
   },
   mounted(){
   },
   computed: {
     calendars() {
       return this.getCalendar();
+    },
+    displayMonth(){
+      return this.currentDate.format('YYYY[年]M[月]')
+    },
+    currentMonth(){
+      return this.currentDate.format('YYYY-MM')
     },
   },
 }
@@ -113,5 +128,11 @@ export default {
 }
 .calendar-day{
   text-align: center;
+}
+.calendar-youbi{
+  flex:1;
+  border-right:1px solid #E0E0E0;
+  margin-right:-1px;
+  text-align:center;
 }
 </style>
