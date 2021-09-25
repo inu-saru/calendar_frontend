@@ -29,7 +29,8 @@
             <div v-for="dayEvent in day.dayEvents" :key="dayEvent.id" >
               <div
                 class="calendar-event"
-                :style="`background-color:${dayEvent.color}`" >
+                :style="`width:${dayEvent.width}%;background-color:${dayEvent.color}`"
+                draggable="true" >
                 {{ dayEvent.name }}
               </div>
             </div>
@@ -93,12 +94,20 @@ export default {
       return calendars
     },
     getDayEvents (date) {
-      return this.events.filter(event => {
+      let dayEvents = []
+      this.events.forEach(event => {
         let startDate = moment(event.start).format('YYYY-MM-DD')
         let endDate = moment(event.end).format('YYYY-MM-DD')
         let Date = date.format('YYYY-MM-DD')
-        if (startDate <= Date && endDate >= Date) return true
+
+        if (startDate === Date) {
+          let betweenDays = moment(endDate).diff(moment(startDate), 'days')
+          let width = betweenDays * 100 + 95
+
+          dayEvents.push({...event, width})
+        }
       })
+      return dayEvents
     },
     getStartDate () {
       let date = moment(this.currentDate)
