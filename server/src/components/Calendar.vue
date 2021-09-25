@@ -100,9 +100,14 @@ export default {
         let endDate = moment(event.end).format('YYYY-MM-DD')
         let Date = date.format('YYYY-MM-DD')
 
-        if (startDate === Date) {
-          let width = this.getEventWidth(startDate, endDate, day)
-          dayEvents.push({...event, width})
+        if (startDate <= Date && endDate >= Date) {
+          if (startDate === Date) {
+            let width = this.getEventWidth(startDate, endDate, day)
+            dayEvents.push({...event, width})
+          } else if (day === 0) {
+            let width = this.getEventWidth(date, endDate, day)
+            dayEvents.push({...event, width})
+          }
         }
       })
       return dayEvents
