@@ -33,71 +33,71 @@
   </div>
 </template>
 <script>
-import moment from "moment";
+import moment from 'moment'
 export default {
-  data() {
+  data () {
     return {
-      currentDate: moment(),
-    };
+      currentDate: moment()
+    }
   },
   methods: {
-    getCalendar() {
-      let startDate = this.getStartDate();
-      const endDate = this.getEndDate();
-      const weekNumber = Math.ceil(endDate.diff(startDate, "days") / 7);
+    getCalendar () {
+      let startDate = this.getStartDate()
+      const endDate = this.getEndDate()
+      const weekNumber = Math.ceil(endDate.diff(startDate, 'days') / 7)
 
-      let calendars = [];
-      let calendarDate = this.getStartDate();
+      let calendars = []
+      let calendarDate = this.getStartDate()
 
       for (let week = 0; week < weekNumber; week++) {
-        let weekRow = [];
-        for (let day = 0;  day < 7; day++) {
+        let weekRow = []
+        for (let day = 0; day < 7; day++) {
           weekRow.push({
-            date: calendarDate.get("date"),
-            month: calendarDate.format("YYYY-MM"),
-          });
-          calendarDate.add(1, "days");
+            date: calendarDate.get('date'),
+            month: calendarDate.format('YYYY-MM')
+          })
+          calendarDate.add(1, 'days')
         }
-        calendars.push(weekRow);
+        calendars.push(weekRow)
       }
-      return calendars;
+      return calendars
     },
-    getStartDate() {
-      let date = moment(this.currentDate);
-      date.startOf("month");
-      const youbiNum = date.day();
-      return date.subtract(youbiNum, "days");
+    getStartDate () {
+      let date = moment(this.currentDate)
+      date.startOf('month')
+      const youbiNum = date.day()
+      return date.subtract(youbiNum, 'days')
     },
-    getEndDate() {
-      let date = moment(this.currentDate);
-      date.endOf("month");
-      const youbiNum = date.day();
-      return date.add(6 - youbiNum, "days");
+    getEndDate () {
+      let date = moment(this.currentDate)
+      date.endOf('month')
+      const youbiNum = date.day()
+      return date.add(6 - youbiNum, 'days')
     },
-    nextMonth() {
-      this.currentDate = moment(this.currentDate).add(1, "month");
+    nextMonth () {
+      this.currentDate = moment(this.currentDate).add(1, 'month')
     },
-    prevMonth() {
-      this.currentDate = moment(this.currentDate).subtract(1, "month");
+    prevMonth () {
+      this.currentDate = moment(this.currentDate).subtract(1, 'month')
     },
-    youbi(dayIndex) {
-      const week = ["日", "月", "火", "水", "木", "金", "土"];
-      return week[dayIndex];
-    },
+    youbi (dayIndex) {
+      const week = ['日', '月', '火', '水', '木', '金', '土']
+      return week[dayIndex]
+    }
   },
-  mounted(){
+  mounted () {
   },
   computed: {
-    calendars() {
-      return this.getCalendar();
+    calendars () {
+      return this.getCalendar()
     },
-    displayMonth(){
+    displayMonth () {
       return this.currentDate.format('YYYY[年]M[月]')
     },
-    currentMonth(){
+    currentMonth () {
       return this.currentDate.format('YYYY-MM')
-    },
-  },
+    }
+  }
 }
 </script>
 

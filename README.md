@@ -21,3 +21,11 @@ app$ npm run dev
 app$ vue init webpack
 # 以降全部エンターでインストール開始
 ```
+
+## lint
+```
+# 確認
+npm run lint
+# 自動修正
+npm run lint -- --fix
+```
