@@ -28,11 +28,13 @@
             </div>
             <div v-for="dayEvent in day.dayEvents" :key="dayEvent.id" >
               <div
+                v-if="dayEvent.width"
                 class="calendar-event"
                 :style="`width:${dayEvent.width}%;background-color:${dayEvent.color}`"
                 draggable="true" >
                 {{ dayEvent.name }}
               </div>
+              <div v-else style="height:26px"></div>
             </div>
           </div>
         </div>
@@ -94,7 +96,9 @@ export default {
       return calendars
     },
     getDayEvents (date, day) {
+      let stackIndex = 0
       let dayEvents = []
+      let startedEvents = []
       this.sortedEvents.forEach(event => {
         let startDate = moment(event.start).format('YYYY-MM-DD')
         let endDate = moment(event.end).format('YYYY-MM-DD')
@@ -102,15 +106,36 @@ export default {
 
         if (startDate <= Date && endDate >= Date) {
           if (startDate === Date) {
-            let width = this.getEventWidth(startDate, endDate, day)
-            dayEvents.push({...event, width})
+            [stackIndex, dayEvents] = this.getStackEvents(event, day, stackIndex, dayEvents, startedEvents, event.start)
           } else if (day === 0) {
-            let width = this.getEventWidth(date, endDate, day)
-            dayEvents.push({...event, width})
+            [stackIndex, dayEvents] = this.getStackEvents(event, day, stackIndex, dayEvents, startedEvents, Date)
+          } else {
+            startedEvents.push(event)
           }
         }
       })
       return dayEvents
+    },
+    getStackEvents (event, day, stackIndex, dayEvents, startedEvents, start) {
+      [stackIndex, dayEvents] = this.getStartedEvents(stackIndex, startedEvents, dayEvents)
+      let width = this.getEventWidth(start, event.end, day)
+      Object.assign(event, {
+        stackIndex
+      })
+      dayEvents.push({...event, width})
+      stackIndex++
+      return [stackIndex, dayEvents]
+    },
+    getStartedEvents (stackIndex, startedEvents, dayEvents) {
+      let startedEvent
+      do {
+        startedEvent = startedEvents.find(event => event.stackIndex === stackIndex)
+        if (startedEvent) {
+          dayEvents.push(startedEvent)
+          stackIndex++
+        }
+      } while (typeof startedEvent !== 'undefined')
+      return [stackIndex, dayEvents]
     },
     getEventWidth (start, end, day) {
       let betweenDays = moment(end).diff(moment(start), 'days')
@@ -211,6 +236,10 @@ export default {
   margin-bottom:1px;
   height:25px;
   line-height:25px;
+  position: relative;
+  z-index:1;
+  border-radius:4px;
+  padding-left:4px;
 }
 .outside{
   background-color: #f7f7f7;
