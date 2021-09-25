@@ -81,7 +81,7 @@ export default {
       for (let week = 0; week < weekNumber; week++) {
         let weekRow = []
         for (let day = 0; day < 7; day++) {
-          let dayEvents = this.getDayEvents(calendarDate)
+          let dayEvents = this.getDayEvents(calendarDate, day)
           weekRow.push({
             day: calendarDate.get('date'),
             month: calendarDate.format('YYYY-MM'),
@@ -93,7 +93,7 @@ export default {
       }
       return calendars
     },
-    getDayEvents (date) {
+    getDayEvents (date, day) {
       let dayEvents = []
       this.events.forEach(event => {
         let startDate = moment(event.start).format('YYYY-MM-DD')
@@ -101,13 +101,19 @@ export default {
         let Date = date.format('YYYY-MM-DD')
 
         if (startDate === Date) {
-          let betweenDays = moment(endDate).diff(moment(startDate), 'days')
-          let width = betweenDays * 100 + 95
-
+          let width = this.getEventWidth(startDate, endDate, day)
           dayEvents.push({...event, width})
         }
       })
       return dayEvents
+    },
+    getEventWidth (start, end, day) {
+      let betweenDays = moment(end).diff(moment(start), 'days')
+      if (betweenDays > 6 - day) {
+        return (6 - day) * 100 + 95
+      } else {
+        return betweenDays * 100 + 95
+      }
     },
     getStartDate () {
       let date = moment(this.currentDate)
