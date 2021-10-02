@@ -195,9 +195,9 @@ export default {
       return elapsedDaysOnDrag
     },
     dragEnd (event, date) {
-      let eventId = event.dataTransfer.getData('eventId')
+      let eventId = Number(event.dataTransfer.getData('eventId'))
       let elapsedDaysOnDrag = event.dataTransfer.getData('elapsedDaysOnDrag')
-      let dragEvent = this.events.find(event => event.id == eventId)
+      let dragEvent = this.events.find(event => event.id === eventId)
       let betweenDays = moment(dragEvent.end).diff(moment(dragEvent.start), 'days')
       dragEvent.start = moment(date).subtract(elapsedDaysOnDrag, 'days').format('YYYY-MM-DD')
       dragEvent.end = moment(dragEvent.start).add(betweenDays, 'days').format('YYYY-MM-DD')
