@@ -22,8 +22,8 @@
             :class="{outside: currentMonth !== day.month}"
             v-for="(day, index) in week"
             :key="index"
-            :ref="`${index}-${day.day}`"
-            @drop="dragEnd($event, day.date, index + '-' + day.day)"
+            :ref="`${day.date}`"
+            @drop="dragEnd($event, day.date, day.date)"
             @dragover.prevent
           >
             <div class="calendar-day">
@@ -33,10 +33,10 @@
               <div
                 v-if="dayEvent.width"
                 class="calendar-event"
-                :ref="`${day.day}-${dayEvent.id}`"
+                :ref="`${day.date}-${dayEvent.id}`"
                 :style="`width:${dayEvent.width}%;background-color:${dayEvent.color}`"
                 draggable="true"
-                @dragstart="dragStart($event, dayEvent, day.day + '-' + dayEvent.id)">
+                @dragstart="dragStart($event, dayEvent, day.date + '-' + dayEvent.id)">
                 {{ dayEvent.name }}
               </div>
               <div v-else style="height:26px"></div>
