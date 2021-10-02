@@ -32,9 +32,10 @@
               <div
                 v-if="dayEvent.width"
                 class="calendar-event"
+                :ref="`${day.day}-${dayEvent.id}`"
                 :style="`width:${dayEvent.width}%;background-color:${dayEvent.color}`"
                 draggable="true"
-                @dragstart="dragStart($event, dayEvent.id)">
+                @dragstart="dragStart($event, dayEvent, day.day + '-' + dayEvent.id)">
                 {{ dayEvent.name }}
               </div>
               <div v-else style="height:26px"></div>
@@ -110,9 +111,9 @@ export default {
 
         if (startDate <= Date && endDate >= Date) {
           if (startDate === Date) {
-            [stackIndex, dayEvents] = this.getStackEvents(event, day, stackIndex, dayEvents, startedEvents, event.start)
+            [stackIndex, dayEvents] = this.getStackEvents(event, date, day, stackIndex, dayEvents, startedEvents, event.start)
           } else if (day === 0) {
-            [stackIndex, dayEvents] = this.getStackEvents(event, day, stackIndex, dayEvents, startedEvents, Date)
+            [stackIndex, dayEvents] = this.getStackEvents(event, date, day, stackIndex, dayEvents, startedEvents, Date)
           } else {
             startedEvents.push(event)
           }
@@ -120,13 +121,14 @@ export default {
       })
       return dayEvents
     },
-    getStackEvents (event, day, stackIndex, dayEvents, startedEvents, start) {
+    getStackEvents (event, date, day, stackIndex, dayEvents, startedEvents, start) {
       [stackIndex, dayEvents] = this.getStartedEvents(stackIndex, startedEvents, dayEvents)
       let width = this.getEventWidth(start, event.end, day)
+      let elapsedDays = moment(date).diff(moment(event.start), 'days')
       Object.assign(event, {
         stackIndex
       })
-      dayEvents.push({...event, width})
+      dayEvents.push({...event, width, elapsedDays})
       stackIndex++
       return [stackIndex, dayEvents]
     },
@@ -171,16 +173,33 @@ export default {
       const week = ['日', '月', '火', '水', '木', '金', '土']
       return week[dayIndex]
     },
-    dragStart (event, eventId) {
+    dragStart (event, dayEvent, ref) {
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.dropEffect = 'move'
-      event.dataTransfer.setData('eventId', eventId)
+      event.dataTransfer.setData('eventId', dayEvent.id)
+      const elapsedDaysOnDrag = this.getElapsedDaysOnDrag(event, dayEvent, ref)
+      event.dataTransfer.setData('elapsedDaysOnDrag', elapsedDaysOnDrag)
+    },
+    getElapsedDaysOnDrag (event, dayEvent, ref) {
+      // 全画面におけるクリック位置
+      const clickX = event.pageX
+      // 要素の位置を取得
+      const clientRect = this.$refs[ref][0].getBoundingClientRect()
+      const positionX = clientRect.left + window.pageXOffset
+      // // 要素内におけるクリック位置を計算
+      const x = clickX - positionX
+      // 要素内における距離から要素から何日目かを計算
+      const elapsedDaysInRef = Math.floor(x / 130)
+      // ドラッグ開始位置がイベント開始日から何日目かを計算
+      const elapsedDaysOnDrag = dayEvent.elapsedDays + elapsedDaysInRef
+      return elapsedDaysOnDrag
     },
     dragEnd (event, date) {
       let eventId = event.dataTransfer.getData('eventId')
+      let elapsedDaysOnDrag = event.dataTransfer.getData('elapsedDaysOnDrag')
       let dragEvent = this.events.find(event => event.id == eventId)
       let betweenDays = moment(dragEvent.end).diff(moment(dragEvent.start), 'days')
-      dragEvent.start = date
+      dragEvent.start = moment(date).subtract(elapsedDaysOnDrag, 'days').format('YYYY-MM-DD')
       dragEvent.end = moment(dragEvent.start).add(betweenDays, 'days').format('YYYY-MM-DD')
     }
   },
