@@ -178,6 +178,7 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.dropEffect = 'move'
       event.dataTransfer.setData('eventId', dayEvent.id)
+      // ドラッグ開始位置が要素内で何日目かを計算
       const elapsedDaysInRef = this.getElapsedDaysInRef(event, ref)
       // ドラッグ開始位置がイベント開始日から何日目かを計算
       const elapsedDaysOnDrag = dayEvent.elapsedDays + elapsedDaysInRef
@@ -186,6 +187,7 @@ export default {
     dragEnd (event, date, ref) {
       let eventId = Number(event.dataTransfer.getData('eventId'))
       let elapsedDaysOnDrag = event.dataTransfer.getData('elapsedDaysOnDrag')
+      // ドロップ位置が要素内で何日目かを計算
       const elapsedDaysInRef = this.getElapsedDaysInRef(event, ref)
       let dragEvent = this.events.find(event => event.id === eventId)
       let betweenDays = moment(dragEvent.end).diff(moment(dragEvent.start), 'days')
@@ -200,7 +202,7 @@ export default {
       // 要素の位置を取得
       const clientRect = this.$refs[ref][0].getBoundingClientRect()
       const positionX = clientRect.left + window.pageXOffset
-      // // 要素内におけるクリック位置を計算
+      // 要素内におけるクリック位置を計算
       const x = clickX - positionX
       // 要素内における距離から要素から何日目かを計算
       const elapsedDaysInRef = Math.floor(x / 130)
