@@ -22,7 +22,8 @@
             :class="{outside: currentMonth !== day.month}"
             v-for="(day, index) in week"
             :key="index"
-            @drop="dragEnd($event, day.date)"
+            :ref="`${index}-${day.day}`"
+            @drop="dragEnd($event, day.date, index + '-' + day.day)"
             @dragover.prevent
           >
             <div class="calendar-day">
@@ -177,10 +178,23 @@ export default {
       event.dataTransfer.effectAllowed = 'move'
       event.dataTransfer.dropEffect = 'move'
       event.dataTransfer.setData('eventId', dayEvent.id)
-      const elapsedDaysOnDrag = this.getElapsedDaysOnDrag(event, dayEvent, ref)
+      const elapsedDaysInRef = this.getElapsedDaysInRef(event, ref)
+      // ドラッグ開始位置がイベント開始日から何日目かを計算
+      const elapsedDaysOnDrag = dayEvent.elapsedDays + elapsedDaysInRef
       event.dataTransfer.setData('elapsedDaysOnDrag', elapsedDaysOnDrag)
     },
-    getElapsedDaysOnDrag (event, dayEvent, ref) {
+    dragEnd (event, date, ref) {
+      let eventId = Number(event.dataTransfer.getData('eventId'))
+      let elapsedDaysOnDrag = event.dataTransfer.getData('elapsedDaysOnDrag')
+      const elapsedDaysInRef = this.getElapsedDaysInRef(event, ref)
+      let dragEvent = this.events.find(event => event.id === eventId)
+      let betweenDays = moment(dragEvent.end).diff(moment(dragEvent.start), 'days')
+      // ドラッグ開始位置の日数分引く、ドロップ終了位置の日数分足す
+      const newStartDate = moment(date).subtract(elapsedDaysOnDrag, 'days').add(elapsedDaysInRef, 'days').format('YYYY-MM-DD')
+      dragEvent.start = newStartDate
+      dragEvent.end = moment(dragEvent.start).add(betweenDays, 'days').format('YYYY-MM-DD')
+    },
+    getElapsedDaysInRef (event, ref) {
       // 全画面におけるクリック位置
       const clickX = event.pageX
       // 要素の位置を取得
@@ -190,17 +204,7 @@ export default {
       const x = clickX - positionX
       // 要素内における距離から要素から何日目かを計算
       const elapsedDaysInRef = Math.floor(x / 130)
-      // ドラッグ開始位置がイベント開始日から何日目かを計算
-      const elapsedDaysOnDrag = dayEvent.elapsedDays + elapsedDaysInRef
-      return elapsedDaysOnDrag
-    },
-    dragEnd (event, date) {
-      let eventId = Number(event.dataTransfer.getData('eventId'))
-      let elapsedDaysOnDrag = event.dataTransfer.getData('elapsedDaysOnDrag')
-      let dragEvent = this.events.find(event => event.id === eventId)
-      let betweenDays = moment(dragEvent.end).diff(moment(dragEvent.start), 'days')
-      dragEvent.start = moment(date).subtract(elapsedDaysOnDrag, 'days').format('YYYY-MM-DD')
-      dragEvent.end = moment(dragEvent.start).add(betweenDays, 'days').format('YYYY-MM-DD')
+      return elapsedDaysInRef
     }
   },
   mounted () {
